@@ -10,3 +10,4 @@ path = "src/main.rs"
 
 [dependencies]
 image = "0.21.1"
+scan_fmt = "0.1.3"
