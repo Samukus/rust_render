@@ -1,19 +1,29 @@
 #[macro_use] extern crate scan_fmt;
 extern crate image;
+extern crate termion;
 
+use termion::{color};
 use std::io::BufReader;
 use std::io::BufRead;
 use std::fs::File;
 use image::{ImageBuffer, Rgb};
 
-const WIDTH: u32 = 1024;
-const HEIGHT: u32 = 1024;
+const WIDTH: u32 = 1920;
+const HEIGHT: u32 = 1080;
 const _RED:      Rgb<u8> = Rgb { data: [255, 0,   0] };
 const _GREEN:    Rgb<u8> = Rgb { data: [0,   255, 0] };
 const _BLUE:     Rgb<u8> = Rgb { data: [0,   0,   255] };
 const _WHITE:    Rgb<u8> = Rgb { data: [255, 255, 255] };
 const _BLACK:    Rgb<u8> = Rgb { data: [0,   0,   0] };
-const MODEL_PATH: &str = "obj/african_head.obj";
+
+const _OBJ_AFRO_HEAD: &str = "obj/african_head.obj";
+const _OBJ_ARTORIAS_SWORD: &str = "obj/artorias_sword.obj";
+const _OBJ_FROSTMOURNE: &str = "obj/frostmourne.obj";
+const _OBJ_VANGUARD: &str = "obj/vanguard.obj";
+
+const MODEL_PATH: &str = _OBJ_AFRO_HEAD;
+
+static mut MAX_VERTEX_ABS: f64 = 0.0;
 
 #[derive(Clone)]
 struct PixelT {
@@ -93,11 +103,22 @@ fn symmetry() {
 
 fn scan_vertex(line: &str, vertex: &mut Vec<[f64; 3]>) -> bool {
     let (x, y, z) = scan_fmt!(line, // input string
-                    "v {f} {f} {f}",  // format
+                    "v {} {} {}",  // format
                     f64, f64, f64);   // type of a-c Options
-    if x != None && y != None && z != None {
-        //println!("Vertex: {} {} {}", x.unwrap(), y.unwrap(), z.unwrap());
+    if x.is_some() && y.is_some() && z.is_some() {
+        // println!("Vertex: {} {} {}", x.unwrap(), y.unwrap(), z.unwrap() as f64);
         vertex.push([x.unwrap(), y.unwrap(), z.unwrap()]);
+        unsafe {
+            if x.unwrap().abs() > MAX_VERTEX_ABS {
+                MAX_VERTEX_ABS = x.unwrap().abs();
+            }
+            if y.unwrap().abs() > MAX_VERTEX_ABS {
+                MAX_VERTEX_ABS = y.unwrap().abs();
+            }
+            if z.unwrap().abs() > MAX_VERTEX_ABS {
+                MAX_VERTEX_ABS = z.unwrap().abs();
+            }
+        }
         return true;
     }
     else {
@@ -107,49 +128,80 @@ fn scan_vertex(line: &str, vertex: &mut Vec<[f64; 3]>) -> bool {
 
 fn scan_face(line: &str, faces: &mut Vec<[usize; 2]>) -> bool {
     let (a, b, c) = scan_fmt!(line, // input string
-                    "f {d}/{*d}/{*d} {d}/{*d}/{*d} {d}/{*d}/{*d}",  // format
+                    "f {}/{*}/{*} {}/{*}/{*} {}/{*}/{*}",  // format
                     usize, usize, usize);   // type of a-c Options
-    if a != None && b != None && c != None {
+    if a.is_some() && b.is_some() && c.is_some() {
         //println!("Triangle: {}-{}-{}", a.unwrap(), b.unwrap(), c.unwrap());
         faces.push([a.unwrap(), b.unwrap()]);
         faces.push([b.unwrap(), c.unwrap()]);
         faces.push([c.unwrap(), a.unwrap()]);
         return true;
     }
-    else {
-        return false;
-    }               
+    let (a, b, c) = scan_fmt!(line, // input string
+                    "f {} {} {}",  // format
+                    usize, usize, usize);   // type of a-c Options
+    if a.is_some() && b.is_some() && c.is_some() {
+        //println!("Triangle: {}-{}-{}", a.unwrap(), b.unwrap(), c.unwrap());
+        faces.push([a.unwrap(), b.unwrap()]);
+        faces.push([b.unwrap(), c.unwrap()]);
+        faces.push([c.unwrap(), a.unwrap()]);
+        return true;
+    }
+    return false;
 }
 
 fn parse_model_obj(file_path: &str) -> (Vec<[f64; 3]>, Vec<[usize; 2]>) {
+    println!("Parse model {}", file_path);
     let mut vertex: Vec<[f64; 3]> = Vec::new();
     let mut faces: Vec<[usize; 2]> = Vec::new();
 
+    let line_count = BufReader::new(&File::open(file_path).unwrap()).lines().count();
     let f = File::open(file_path).unwrap();
     let file = BufReader::new(&f);
+    println!("Lines: {}", line_count);
+    let mut iter = 0;
     for line in file.lines() {
         let l = line.unwrap();
         scan_vertex(&l.clone(), &mut vertex);
         scan_face(&l.clone(), &mut faces);
+        if iter % (10*line_count/100) == 0 {
+            println!("{}Load progress: {}%", color::Fg(color::Yellow), iter / (line_count/100));
+        }
+        iter += 1;
     }
+    print!("{}", color::Fg(color::White));
+    unsafe {
+        for i in 0..vertex.len() {
+            vertex[i][0] /= MAX_VERTEX_ABS * 1.1;
+            vertex[i][1] /= MAX_VERTEX_ABS * 1.1;
+            vertex[i][2] /= MAX_VERTEX_ABS * 1.1;
+        }
+    }
+    println!("Vertex: {}\nFaces: {}", vertex.len(), faces.len());
     return (vertex, faces);
 }
 
 fn main() {
     let mut img = ImageBuffer::<Rgb<u8>, Vec<u8>>::new(WIDTH, HEIGHT);
     let (vertex, faces) = parse_model_obj(MODEL_PATH);
-    println!("Vertex: {}\nFaces: {}", vertex.len(), faces.len());
 
-    for i in 0..faces.len()-1 {
-        let vertex_a_x = vertex[faces[i][0] - 1][0] * WIDTH as f64/2.0 + WIDTH as f64/2.0;
-        let vertex_a_y = vertex[faces[i][0] - 1][1] * HEIGHT as f64/2.0 + HEIGHT as f64/2.0;
-        let vertex_b_x = vertex[faces[i][1] - 1][0] * WIDTH as f64/2.0 + WIDTH as f64/2.0;
-        let vertex_b_y = vertex[faces[i][1] - 1][1] * HEIGHT as f64/2.0 + HEIGHT as f64/2.0;
+    for i in 0..faces.len() {
+        let min_face: u32 = if WIDTH < HEIGHT { WIDTH } else { HEIGHT };
+        let vertex_a_x = vertex[faces[i][0] - 1][0] * min_face as f64/2.0 + WIDTH as f64/2.0;
+        let vertex_a_y = vertex[faces[i][0] - 1][1] * min_face as f64/2.0 + HEIGHT as f64/2.0;
+        let vertex_b_x = vertex[faces[i][1] - 1][0] * min_face as f64/2.0 + WIDTH as f64/2.0;
+        let vertex_b_y = vertex[faces[i][1] - 1][1] * min_face as f64/2.0 + HEIGHT as f64/2.0;
         draw_line(&mut img, PixelT{x: vertex_a_x as i32, y: vertex_a_y as i32},
                             PixelT{x: vertex_b_x as i32, y: vertex_b_y as i32}, _WHITE);
+        if i % (10*faces.len()/100) == 0 {
+            println!("{}Process progress: {}%", color::Fg(color::Green), i / (faces.len()/100));
+        }
     }
+    print!("{}", color::Fg(color::White));
 
     // write it out to a file
+    println!("Miror image");
     mirror_horizontal(&mut img);
+    println!("Output image");
     img.save("output.png").unwrap();
 }
