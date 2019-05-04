@@ -8,28 +8,46 @@ use std::io::BufRead;
 use std::fs::File;
 use image::{ImageBuffer, Rgb};
 
+/** Image Size */
 const WIDTH: u32 = 1920;
 const HEIGHT: u32 = 1080;
-const _RED:      Rgb<u8> = Rgb { data: [255, 0,   0] };
-const _GREEN:    Rgb<u8> = Rgb { data: [0,   255, 0] };
-const _BLUE:     Rgb<u8> = Rgb { data: [0,   0,   255] };
-const _WHITE:    Rgb<u8> = Rgb { data: [255, 255, 255] };
-const _BLACK:    Rgb<u8> = Rgb { data: [0,   0,   0] };
 
+/** Image Colors */
+const _RED:         Rgb<u8> = Rgb { data: [255, 0,   0] };
+const _GREEN:       Rgb<u8> = Rgb { data: [0,   255, 0] };
+const _BLUE:        Rgb<u8> = Rgb { data: [0,   0,   255] };
+const _ICE:         Rgb<u8> = Rgb { data: [195, 203, 217] };
+const _ICE_BLUE:    Rgb<u8> = Rgb { data: [7,   243, 229] };
+const _WHITE:       Rgb<u8> = Rgb { data: [255, 255, 255] };
+const _GRAY:        Rgb<u8> = Rgb { data: [128, 128, 128] };
+const _DARK_GRAY:   Rgb<u8> = Rgb { data: [64,  64,  64] };
+const _BLACK:       Rgb<u8> = Rgb { data: [0,   0,   0] };
+
+/** Vertex coordinates definitions */
+const _VERTEX_X: usize = 0;
+const _VERTEX_Y: usize = 1;
+const _VERTEX_Z: usize = 2;
+
+/** Face point defenitions */
+const _FACE_POINT_A: usize = 0;
+const _FACE_POINT_B: usize = 1;
+
+/** Project test images */
 const _OBJ_AFRO_HEAD: &str = "obj/african_head.obj";
 const _OBJ_ARTORIAS_SWORD: &str = "obj/artorias_sword.obj";
 const _OBJ_FROSTMOURNE: &str = "obj/frostmourne.obj";
 const _OBJ_VANGUARD: &str = "obj/vanguard.obj";
 
-const MODEL_PATH: &str = _OBJ_AFRO_HEAD;
-
-static mut MAX_VERTEX_ABS: f64 = 0.0;
-
+/** Pixel structure  definition */
 #[derive(Clone)]
 struct PixelT {
     x: i32,
     y: i32,
 }
+
+/** Current model: */
+const MODEL_PATH: &str = _OBJ_AFRO_HEAD;
+static mut MAX_VERTEX_ABS: f64 = 0.0;
 
 fn mirror_horizontal(img: &mut ImageBuffer<Rgb<u8>, Vec<u8>>) {
     let height = img.dimensions().1;
@@ -172,9 +190,9 @@ fn parse_model_obj(file_path: &str) -> (Vec<[f64; 3]>, Vec<[usize; 2]>) {
     print!("{}", color::Fg(color::White));
     unsafe {
         for i in 0..vertex.len() {
-            vertex[i][0] /= MAX_VERTEX_ABS * 1.1;
-            vertex[i][1] /= MAX_VERTEX_ABS * 1.1;
-            vertex[i][2] /= MAX_VERTEX_ABS * 1.1;
+            vertex[i][_VERTEX_X] /= MAX_VERTEX_ABS * 1.1;
+            vertex[i][_VERTEX_Y] /= MAX_VERTEX_ABS * 1.1;
+            vertex[i][_VERTEX_Z] /= MAX_VERTEX_ABS * 1.1;
         }
     }
     println!("Vertex: {}\nFaces: {}", vertex.len(), faces.len());
@@ -187,10 +205,14 @@ fn main() {
 
     for i in 0..faces.len() {
         let min_face: u32 = if WIDTH < HEIGHT { WIDTH } else { HEIGHT };
-        let vertex_a_x = vertex[faces[i][0] - 1][0] * min_face as f64/2.0 + WIDTH as f64/2.0;
-        let vertex_a_y = vertex[faces[i][0] - 1][1] * min_face as f64/2.0 + HEIGHT as f64/2.0;
-        let vertex_b_x = vertex[faces[i][1] - 1][0] * min_face as f64/2.0 + WIDTH as f64/2.0;
-        let vertex_b_y = vertex[faces[i][1] - 1][1] * min_face as f64/2.0 + HEIGHT as f64/2.0;
+
+        let vertex_a: usize = faces[i][_FACE_POINT_A] - 1;
+        let vertex_b: usize = faces[i][_FACE_POINT_B] - 1;
+
+        let vertex_a_x = vertex[vertex_a][_VERTEX_X] * min_face as f64/2.0 + WIDTH as f64/2.0;
+        let vertex_a_y = vertex[vertex_a][_VERTEX_Y] * min_face as f64/2.0 + HEIGHT as f64/2.0;
+        let vertex_b_x = vertex[vertex_b][_VERTEX_X] * min_face as f64/2.0 + WIDTH as f64/2.0;
+        let vertex_b_y = vertex[vertex_b][_VERTEX_Y] * min_face as f64/2.0 + HEIGHT as f64/2.0;
         draw_line(&mut img, PixelT{x: vertex_a_x as i32, y: vertex_a_y as i32},
                             PixelT{x: vertex_b_x as i32, y: vertex_b_y as i32}, _WHITE);
         if i % (10*faces.len()/100) == 0 {
