@@ -9,15 +9,13 @@ pub struct TgaCanvas {
 
 impl Canvas for TgaCanvas {
     fn set(&mut self, x: i32, y: i32, color: u32) -> Result<(), String> {
-        let height = self.image.dimensions().1;
-        let width = self.image.dimensions().0;
-        if x as u32 >= width || y as u32 >= height || x < 0 || y < 0 {
+        if x as u32 >= self.width || y as u32 >= self.height || x < 0 || y < 0 {
             return Err("Out of bounds coordinates".to_string());
         }
         let rgb_color: Rgb<u8> = Rgb { data: [(color >> (8*2)) as u8,
                                               (color >> (8*1)) as u8,
                                               (color as u8)] };
-        self.image.get_pixel_mut(x as u32, (self.height as i32 - y) as u32).data = rgb_color.data;
+        self.image.get_pixel_mut(x as u32, ((self.height-1) as i32 - y) as u32).data = rgb_color.data;
         Ok(())
     }
     fn get(&self, _x: i32, _y: i32) -> Result<u32, String> {

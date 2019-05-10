@@ -18,7 +18,7 @@ pub struct SdlCanvas {
 impl Canvas for SdlCanvas {
     fn set(&mut self, x: i32, y: i32, color: u32) -> Result<(), String> {
         self.renderer.set_draw_color(Color::RGB((color >> (8*2)) as u8, (color >> (8*1)) as u8, color as u8));
-        self.renderer.draw_point(Point::new(x, self.height as i32 - y))?;
+        self.renderer.draw_point(Point::new(x, (self.height-1) as i32 - y))?;
         Ok(())
     }
     fn get(&self, _x: i32, _y: i32) -> Result<u32, String> {
