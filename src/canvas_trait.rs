@@ -1,3 +1,7 @@
+use std::boxed::Box;
+use crate::geometry::*;
+use crate::model_trait::Model;
+
 pub trait Canvas {
     fn set(&mut self, x: i32, y: i32, color: u32) -> Result<(), String>;
     fn get(&self, x: i32, y: i32) -> Result<u32, String>;
@@ -5,7 +9,14 @@ pub trait Canvas {
     fn out(&mut self) -> Result<(), String>;
     fn get_height(&self) -> u32;
     fn get_width(&self) -> u32;
-
+    fn render_wire(&mut self, model: Box<Model>, multiplier: f64, offset: Vector3D, color: u32) {
+        for elem in model.triangle_iter() {
+            let triangle = (elem.clone() * multiplier) + offset.clone();
+            self.line(triangle.p1.x as i32, triangle.p1.y as i32, triangle.p2.x as i32, triangle.p2.y as i32, color).unwrap();
+            self.line(triangle.p2.x as i32, triangle.p2.y as i32, triangle.p3.x as i32, triangle.p3.y as i32, color).unwrap();
+            self.line(triangle.p3.x as i32, triangle.p3.y as i32, triangle.p1.x as i32, triangle.p1.y as i32, color).unwrap();
+        }
+    }
     fn line(&mut self, x0: i32, y0: i32, x1: i32, y1: i32, color: u32) -> Result<(), String> {
         let count = if (y1 - y0).abs() > (x1 - x0).abs() {
                         (y1 - y0)
