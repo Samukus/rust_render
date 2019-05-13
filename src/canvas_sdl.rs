@@ -69,21 +69,21 @@ impl Canvas for SdlCanvas {
 
 #[test]
 fn out_of_image_bounds() {
-    use crate::canvas_trait::RgbColor;
+    use crate::canvas_trait::{RgbColor, Ergbcolor};
     let mut canvas: SdlCanvas = Canvas::new(100, 100);
-    match canvas.line( -100, 0, 50, 50, RgbColor::WHITE.value()) {
+    match canvas.line( -100, 0, 50, 50, RgbColor::new(Ergbcolor::WHITE).value()) {
         Result::Ok(_val) => println!("Line {},{}..{},{} is OK", -100, 0, 50, 50),
         Result::Err(err) => println!("Line {},{}..{},{} is failed: {}", -100, 0, 50, 50, err),
     }
-    match canvas.line(0, -100, 50, 50, RgbColor::WHITE.value()) {
+    match canvas.line(0, -100, 50, 50, RgbColor::new(Ergbcolor::WHITE).value()) {
         Result::Ok(_val) => println!("Line {},{}..{},{} is OK", 0, -100, 50, 50),
         Result::Err(err) => println!("Line {},{}..{},{} is failed: {}", 0, -100, 50, 50, err),
     }
-    match canvas.line(0, 0, 500,50, RgbColor::WHITE.value()) {
+    match canvas.line(0, 0, 500,50, RgbColor::new(Ergbcolor::WHITE).value()) {
         Result::Ok(_val) => println!("Line {},{}..{},{} is OK", 0, 0, 500,50),
         Result::Err(err) => println!("Line {},{}..{},{} is failed: {}", 0, 0, 500, 50, err),
     }
-    match canvas.line(0, 0, 50, 500, RgbColor::WHITE.value()) {
+    match canvas.line(0, 0, 50, 500, RgbColor::new(Ergbcolor::WHITE).value()) {
         Result::Ok(_val) => println!("Line {},{}..{},{} is OK", 0, 0, 50, 500),
         Result::Err(err) => println!("Line {},{}..{},{} is failed: {}", 0, 0, 50, 500, err),
     }

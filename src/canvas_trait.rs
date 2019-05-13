@@ -1,4 +1,5 @@
 use std::boxed::Box;
+use std::ops::Mul;
 use std::mem;
 use crate::geometry::*;
 use crate::model_trait::Model;
@@ -19,7 +20,20 @@ pub trait Canvas {
             self.triangle_wire(triangle, color).unwrap();
         }
     }
-    fn render_poly(&mut self, model: Box<Model>, multiplier: f64, offset: Vector3D, color: u32) {
+    fn render_poly_lightning(&mut self, model: Box<Model>, multiplier: f64, offset: Vector3D, color: RgbColor) {
+        let light_vec = Vector3D {x: 0.0, y: 0.0, z: -1.0};
+        for elem in model.triangle_iter() {
+            let triangle = (elem.clone() * multiplier) + offset.clone();
+            let n = triangle.normal();
+            let intensity = light_vec.scalar(n);
+            if intensity < 0.0 {
+                continue;
+            }
+            let trg_color = color * intensity;
+            self.triangle_colored(triangle, trg_color.value()).unwrap();
+        }
+    }
+    fn render_poly_rnd_colored(&mut self, model: Box<Model>, multiplier: f64, offset: Vector3D) {
         let mut rng = rand::thread_rng();
         for elem in model.triangle_iter() {
             let triangle = (elem.clone() * multiplier) + offset.clone();
@@ -92,7 +106,7 @@ pub trait Canvas {
 
 /** Image Colors */
 #[allow(dead_code)]
-pub enum RgbColor {
+pub enum Ergbcolor {
     RED,
     GREEN,
     BLUE,
@@ -104,18 +118,56 @@ pub enum RgbColor {
     BLACK,
 }
 
+#[derive(Clone, Copy)]
+pub struct RgbColor {
+    red: u8,
+    green: u8,
+    blue: u8,
+}
+
 impl RgbColor {
-    pub fn value(&self) -> u32 {
-        match *self {
-            RgbColor::RED => 0xFF0000,
-            RgbColor::GREEN => 0x00FF00,
-            RgbColor::BLUE => 0x0000FF,
-            RgbColor::ICE => 0xC3CBD9,
-            RgbColor::ICEBLUE => 0x07F3E5,
-            RgbColor::WHITE => 0xFFFFFF,
-            RgbColor::GRAY => 0x808080,
-            RgbColor::DARKGRAY => 0x404040,
-            RgbColor::BLACK => 0x000000,
+    #[allow(dead_code)]
+    pub fn new(color: Ergbcolor) -> Self {
+        match color {
+            Ergbcolor::RED =>       RgbColor{red: 0xFF, green: 0x00, blue: 0x00}, // 0xFF0000
+            Ergbcolor::GREEN =>     RgbColor{red: 0x00, green: 0xFF, blue: 0x00}, // 0x00FF00
+            Ergbcolor::BLUE =>      RgbColor{red: 0xFF, green: 0x00, blue: 0xFF}, // 0x0000FF
+            Ergbcolor::ICE =>       RgbColor{red: 0xC3, green: 0xCB, blue: 0xD9}, // 0xC3CBD9
+            Ergbcolor::ICEBLUE =>   RgbColor{red: 0x07, green: 0xF3, blue: 0xE5}, // 0x07F3E5
+            Ergbcolor::WHITE =>     RgbColor{red: 0xFF, green: 0xFF, blue: 0xFF}, // 0xFFFFFF
+            Ergbcolor::GRAY =>      RgbColor{red: 0x80, green: 0x80, blue: 0x80}, // 0x808080
+            Ergbcolor::DARKGRAY =>  RgbColor{red: 0x40, green: 0x40, blue: 0x40}, // 0x404040
+            Ergbcolor::BLACK =>     RgbColor{red: 0x00, green: 0x00, blue: 0x00}, // 0x000000
         }
     }
+    pub fn value(&self) -> u32 {
+        let mut result: u32 = self.red as u32 * 256;
+        result = (result + self.green as u32) * 256;
+        (result + self.blue as u32) 
+    }
+}
+
+impl Mul<f64> for RgbColor {
+    type Output = RgbColor;
+    fn mul(self, k: f64) -> Self {
+        RgbColor {
+            red: (self.red as f64 * k) as u8,
+            green: (self.green as f64 * k) as u8,
+            blue: (self.blue as f64 * k) as u8,
+        }
+    }
+}
+
+#[test]
+fn test_rgb() {
+    let rgb: RgbColor = RgbColor {red: 255, green: 255, blue: 255};
+    println!("Rgb: {:06X}", rgb.value());
+    let rgb: RgbColor = RgbColor {red: 255, green: 0, blue: 0};
+    println!("Rgb: {:06X}", rgb.value());
+    let rgb: RgbColor = RgbColor {red: 0, green: 255, blue: 0};
+    println!("Rgb: {:06X}", rgb.value());
+    let rgb: RgbColor = RgbColor {red: 0, green: 0, blue: 255};
+    println!("Rgb: {:06X}", rgb.value());
+    let rgb: RgbColor = RgbColor {red: 16, green: 16, blue: 16};
+    println!("Rgb: {:06X}", rgb.value());
 }

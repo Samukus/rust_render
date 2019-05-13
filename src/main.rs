@@ -11,7 +11,10 @@ mod canvas_tga;
 use canvas_tga::TgaCanvas;
 
 mod canvas_trait;
-use canvas_trait::{Canvas, RgbColor};
+use canvas_trait::Canvas;
+#[allow(unused)]
+use canvas_trait::RgbColor;
+use canvas_trait::Ergbcolor;
 
 mod model_trait;
 
@@ -30,38 +33,27 @@ const SIZE: f64 = HEIGHT as f64 * 0.45;
 #[allow(dead_code)]
 const OBJ_AFRO_HEAD: &str = "obj/african_head.obj";
 #[allow(dead_code)]
-const OBJ_ARTORIAS_SWORD: &str = "obj/artorias_sword.obj";
-#[allow(dead_code)]
 const OBJ_FROSTMOURNE: &str = "obj/frostmourne.obj";
 #[allow(dead_code)]
 const OBJ_VANGUARD: &str = "obj/vanguard.obj";
 
 fn main() {
     let afro_head: ObjModel = model_trait::Model::new(std::path::Path::new(OBJ_AFRO_HEAD));
-    // let frostmourne: ObjModel = model_trait::Model::new(std::path::Path::new(OBJ_FROSTMOURNE));
-    // let artorias_sword: ObjModel = model_trait::Model::new(std::path::Path::new(OBJ_ARTORIAS_SWORD));
+    let frostmourne: ObjModel = model_trait::Model::new(std::path::Path::new(OBJ_FROSTMOURNE));
     let mut canvas: SdlCanvas = canvas_trait::Canvas::new(WIDTH, HEIGHT);
-
-    canvas.render_poly(Box::new(afro_head), SIZE,
+    canvas.render_poly_lightning(Box::new(afro_head), SIZE,
                        Vector3D {
-                           x: WIDTH as f64 * 0.25,
+                           x: WIDTH as f64 * 0.33,
                            y: HEIGHT as f64 * 0.50,
                            z: 0.0
                        },
-                       RgbColor::WHITE.value());
-    // canvas.render_wire(Box::new(artorias_sword), SIZE * 2.0,
-    //                    Vector3D {
-    //                        x: WIDTH as f64 * 0.50,
-    //                        y: HEIGHT as f64 * 0.05,
-    //                        z: 0.0
-    //                    },
-    //                    RgbColor::RED.value()); 
-    // canvas.render_wire(Box::new(frostmourne), SIZE,
-    //                    Vector3D {
-    //                        x: WIDTH as f64 * 0.75,
-    //                        y: HEIGHT as f64 * 0.50,
-    //                        z: 0.0
-    //                    },
-    //                    RgbColor::ICEBLUE.value()); 
+                       RgbColor::new(Ergbcolor::GRAY));
+    canvas.render_poly_lightning(Box::new(frostmourne), SIZE,
+                       Vector3D {
+                           x: WIDTH as f64 * 0.66,
+                           y: HEIGHT as f64 * 0.50,
+                           z: 0.0
+                       },
+                       RgbColor::new(Ergbcolor::ICEBLUE));
     canvas.out().unwrap();
 }
