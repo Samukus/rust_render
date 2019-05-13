@@ -65,8 +65,8 @@ impl ObjModel {
         for line in file.lines() {
             let l = line.unwrap();
 
-            if progress % (5*line_count/100) == 0 {
-                println!("Load progress: {}%", progress / (line_count/100));
+            if progress % (10*line_count/100) == 0 {
+                println!("Loading progress: {}%", progress / (line_count/100));
             }
             progress += 1;
 
@@ -92,9 +92,9 @@ impl ObjModel {
                 Result::Ok(val) => {
                     self.triangles.push(
                         Triangle {
-                            p1: vertex[val.0 - 1].clone() / max_abs,
-                            p2: vertex[val.1 - 1].clone() / max_abs,
-                            p3: vertex[val.2 - 1].clone() / max_abs,
+                            p0: vertex[val.0 - 1].clone() / max_abs,
+                            p1: vertex[val.1 - 1].clone() / max_abs,
+                            p2: vertex[val.2 - 1].clone() / max_abs,
                         }
                     );
                     continue;

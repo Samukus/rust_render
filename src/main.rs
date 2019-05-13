@@ -38,30 +38,30 @@ const OBJ_VANGUARD: &str = "obj/vanguard.obj";
 
 fn main() {
     let afro_head: ObjModel = model_trait::Model::new(std::path::Path::new(OBJ_AFRO_HEAD));
-    let frostmourne: ObjModel = model_trait::Model::new(std::path::Path::new(OBJ_FROSTMOURNE));
-    let artorias_sword: ObjModel = model_trait::Model::new(std::path::Path::new(OBJ_ARTORIAS_SWORD));
+    // let frostmourne: ObjModel = model_trait::Model::new(std::path::Path::new(OBJ_FROSTMOURNE));
+    // let artorias_sword: ObjModel = model_trait::Model::new(std::path::Path::new(OBJ_ARTORIAS_SWORD));
     let mut canvas: SdlCanvas = canvas_trait::Canvas::new(WIDTH, HEIGHT);
 
-    canvas.render_wire(Box::new(afro_head), SIZE,
+    canvas.render_poly(Box::new(afro_head), SIZE,
                        Vector3D {
                            x: WIDTH as f64 * 0.25,
                            y: HEIGHT as f64 * 0.50,
                            z: 0.0
                        },
                        RgbColor::WHITE.value());
-    canvas.render_wire(Box::new(artorias_sword), SIZE * 2.0,
-                       Vector3D {
-                           x: WIDTH as f64 * 0.50,
-                           y: HEIGHT as f64 * 0.05,
-                           z: 0.0
-                       },
-                       RgbColor::RED.value()); 
-    canvas.render_wire(Box::new(frostmourne), SIZE,
-                       Vector3D {
-                           x: WIDTH as f64 * 0.75,
-                           y: HEIGHT as f64 * 0.50,
-                           z: 0.0
-                       },
-                       RgbColor::ICEBLUE.value()); 
+    // canvas.render_wire(Box::new(artorias_sword), SIZE * 2.0,
+    //                    Vector3D {
+    //                        x: WIDTH as f64 * 0.50,
+    //                        y: HEIGHT as f64 * 0.05,
+    //                        z: 0.0
+    //                    },
+    //                    RgbColor::RED.value()); 
+    // canvas.render_wire(Box::new(frostmourne), SIZE,
+    //                    Vector3D {
+    //                        x: WIDTH as f64 * 0.75,
+    //                        y: HEIGHT as f64 * 0.50,
+    //                        z: 0.0
+    //                    },
+    //                    RgbColor::ICEBLUE.value()); 
     canvas.out().unwrap();
 }

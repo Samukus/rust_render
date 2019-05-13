@@ -88,36 +88,3 @@ fn out_of_image_bounds() {
         Result::Err(err) => println!("Line {},{}..{},{} is failed: {}", 0, 0, 50, 500, err),
     }
 }
-
-/* Pixel structure  definition */
-// #[derive(Clone)]
-// struct PixelT {
-//     x: i32,
-//     y: i32,
-// }
-// #[test]
-// fn symmetry() {
-//     let mut canvas: SdlCanvas = Canvas::new(100, 100);
-//     let start: PixelT = PixelT{x: 0, y: 0};
-//     let ends = [
-//         PixelT{x: 10, y: 90},
-//         PixelT{x: 30, y: 70},
-//         PixelT{x: 50, y: 50},
-//         PixelT{x: 70, y: 30},
-//         PixelT{x: 90, y: 10},
-//     ];
-
-//     for i in 0..ends.len()-1 {
-//         draw_line(&mut img, start.clone(), ends[i].clone(), _RED);
-//         draw_line(&mut img, ends[i].clone(), start.clone(), _GREEN);    
-//     }
-
-//     for x in (0..img.dimensions().0 as u32).rev() {
-//         for y in (0..img.dimensions().1 as u32).rev() {
-//             println!("{},{} - {}, {}, {}", x, y, img.get_pixel(x, y).data[0],
-//                                                 img.get_pixel(x, y).data[1],
-//                                                 img.get_pixel(x, y).data[2]);
-//             assert!(img.get_pixel_mut(x, y).data[0] != _RED[0]);
-//         }
-//     }
-// }
