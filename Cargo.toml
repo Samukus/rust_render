@@ -1,8 +1,8 @@
 [package]
 name = "rust-render"
 version = "0.1.0"
-authors = ["Alexey Skrobotov <Alexey.Skrobotov@softeq.com>"]
-edition = "2018"
+authors = ["Alexey Skrobotov <skrobotov.alexey@gmail.com>"]
+edition = "2019"
 
 [dependencies]
 image = "0.21.1"
