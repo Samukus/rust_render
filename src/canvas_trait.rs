@@ -102,6 +102,66 @@ pub trait Canvas {
         }
         Ok(())
     }
+    fn triangle_z_buffered(&mut self, trgl: Triangle) -> Result<(), String> {
+        let mut p0 = trgl.p0;
+        let mut p1 = trgl.p1;
+        let mut p2 = trgl.p2;
+
+        if p0.y == p1.y && p0.y == p2.y {
+            return Ok(()); // i dont care about degenerate triangles
+        }
+        // sort the vertices, p0, p1, p2 lower-to-upper (bubblesort yay!)
+        if p0.y > p1.y {
+            mem::swap(&mut p0, &mut p1);
+        }
+        if p0.y > p2.y {
+            mem::swap(&mut p0, &mut p2);
+        }
+        if p1.y > p2.y {
+            mem::swap(&mut p1, &mut p2);
+        }
+        if (p0.x > p1.x) {
+            mem::swap(&mut p0, &mut p1);
+        }
+        if p1.y != p0.y {
+            println!("Wrong points");
+            return Err(("Wrong points".to_string())); // i dont care about degenerate triangles
+        }
+        self.line(p0.x as i32, p0.y as i32, p1.x as i32, p1.y as i32, 0xFFFFFF)?;
+        self.line(p1.x as i32, p1.y as i32, p2.x as i32, p2.y as i32, 0xFFFFFF)?;
+        self.line(p2.x as i32, p2.y as i32, p0.x as i32, p0.y as i32, 0xFFFFFF)?;
+        let N: usize = (p2.y - p0.y) as usize;
+
+        let dxLeft  = (p0.x - p2.x) / (N as f64);
+        let dxRight = (p1.x - p2.x) / (N as f64);
+
+        let dzLeft  = (p0.z - p2.z) / (N as f64);
+        let dzRight = (p1.z - p2.z) / (N as f64);
+
+        println!("p0 {},{},{} p1 {},{},{}", p0.x, p0.y, p0.z, p1.x, p1.y, p1.z);
+        println!("dxLeft {}, dxRight {}", dxLeft, dxRight);
+        println!("dzLeft {}, dzRight {}", dzLeft, dzRight);
+
+        for i in 0..(N+1) {
+            let xLeft = (p2.x + dxLeft * (i as f64));
+            let xRight = (p2.x + dxRight * (i as f64));
+
+            let zLeft = (p2.z + dzLeft * (i as f64));
+            let zRight = (p2.z + dzRight * (i as f64));
+            let dZinternal = (zRight - zLeft) / (xRight - xLeft);
+
+            let y = p2.y - i as f64;
+            println!("line: x {}..{}; z {}..{}", xLeft, xRight, zLeft, zRight);
+            for x in xLeft as usize .. xRight as usize + 1 {
+                let z = zLeft + dZinternal * x as f64;
+                let color_value: u8 = (255.0 * (z/1000.0)) as u8;
+                let color = RgbColor{red: color_value, green: color_value, blue: color_value};
+                self.set(x as i32, y as i32, color.value()).unwrap();
+                println!("set: [{},{},{} color value {}]", x,y,z, color_value);
+            }
+        }
+        Ok(())
+    }
 }
 
 /** Image Colors */
