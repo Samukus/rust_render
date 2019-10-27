@@ -2,7 +2,7 @@
 name = "rust-render"
 version = "0.1.0"
 authors = ["Alexey Skrobotov <skrobotov.alexey@gmail.com>"]
-edition = "2019"
+edition = "2018"
 
 [dependencies]
 image = "0.21.1"
@@ -10,3 +10,4 @@ scan_fmt = "0.1.3"
 sdl2 = "0.32.2"
 log = "0.3"
 rand = "0.3.0"
+ndarray = "0.12.1"

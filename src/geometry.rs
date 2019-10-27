@@ -23,6 +23,11 @@ impl Vector3D {
     pub fn scalar(&self, vec: Vector3D) -> f64 {
         self.x*vec.x + self.y*vec.y + self.z*vec.z
     }
+    pub fn round(& self) -> Vector3D {
+        Vector3D {x: self.x.round(),
+                  y: self.y.round(),
+                  z: self.z.round()}
+    }
 }
 #[test]
 fn vector_abs() {

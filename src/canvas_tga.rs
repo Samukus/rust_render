@@ -1,5 +1,6 @@
 use image::{ImageBuffer, Rgb};
 use crate::canvas_trait::Canvas;
+use crate::geometry::*;
 
 pub struct TgaCanvas {
     image: ImageBuffer<Rgb<u8>, Vec<u8>>,
@@ -8,7 +9,10 @@ pub struct TgaCanvas {
 }
 
 impl Canvas for TgaCanvas {
-    fn set(&mut self, x: i32, y: i32, color: u32) -> Result<(), String> {
+    fn set(&mut self, point: Vector3D, color: u32) -> Result<(), String> {
+        let x = point.x.round() as i32;
+        let y = point.y.round() as i32;
+        let _z = point.z.round() as i32;
         if x as u32 >= self.width || y as u32 >= self.height || x < 0 || y < 0 {
             return Err("Out of bounds coordinates".to_string());
         }
